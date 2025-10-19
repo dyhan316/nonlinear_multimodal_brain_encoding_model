@@ -11,7 +11,7 @@ from typing import Dict, Any
 
 # paths
 # Set your data directory path here
-REPO_DIR = "/path/to/your/semantic_decoding_data"  # Update this path for your environment
+REPO_DIR = "/path/to/your/semantic_decoding_data"
 # Alternative path configuration:
 # REPO_DIR = "/alternative/path/to/semantic_decoding_data"
 DATA_LM_DIR = os.path.join(REPO_DIR, "data_lm")
