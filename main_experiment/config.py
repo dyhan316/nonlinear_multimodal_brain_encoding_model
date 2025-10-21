@@ -11,7 +11,7 @@ from typing import Dict, Any
 
 # paths
 # Set your data directory path here
-REPO_DIR = "/path/to/your/semantic_decoding_data"
+REPO_DIR = "/global/cfs/cdirs/m4727/DANNY_EVCUATE_SEMANTIC_DECODING_FROM_NERSC_FOR_A_WHILE/semantic_decoding_data"
 # Alternative path configuration:
 # REPO_DIR = "/alternative/path/to/semantic_decoding_data"
 DATA_LM_DIR = os.path.join(REPO_DIR, "data_lm")

@@ -23,7 +23,7 @@ import argparse
 import config 
 
 from huggingface_hub import login
-login("<PLZ PUT IN YOUR HUGGINGFACE TOKEN>")
+login("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")
 
 # add_space_to_wordseqjbl, adhoc implementation: For use with LLAMA3, empty string needs to be added at the beginning of wordseqs... (since tokenization helper assumes there's a " " in front of each word) Some items are missing this, so add it and save updated wordseqs!
 #! run this!! (Actually no need any more.. just here for recordkeeping purposes)
@@ -115,6 +115,7 @@ if __name__ == "__main__":
             inputs['attention_mask'] = torch.ones(inputs['input_ids'].shape).to(model.device)
             with torch.no_grad():
                 out = list(model(**inputs, output_hidden_states=True)[2]) #list of hidden states (layer by layer)
+                print("Processing phrase:", model.device)
             for layer_num in range(num_layers):
                 out_layer = out[layer_num][0].cpu().detach().numpy() # Extract layer by layer! Should functionalize this and use for loop to get each layer!?
                 out_layer = np.array(out_layer)
@@ -131,7 +132,7 @@ if __name__ == "__main__":
     # Convert back from dictionary to matrix
     for layer_num in tqdm(range(num_layers)):
     # for layer_num in range(num_layers):
-        feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num], llama_version = llama_version)
+        feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num]) #, llama_version = llama_version)
         
         model_file_name = model_name.replace("/", "_")
         os.makedirs(os.path.join(config.STIM_FEATURE_EXTRACTED_DIR, model_file_name), exist_ok = True)
