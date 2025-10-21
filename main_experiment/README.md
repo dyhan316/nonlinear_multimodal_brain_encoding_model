@@ -1,5 +1,31 @@
 # Aligning the Brain with Language Models Through a Nonlinear and Multimodal Approach
 
+```
+#salloc --nodes 1 --qos interactive --time 04:00:00 --constraint cpu -c 64 --mem 100GB --account=m4135
+salloc --nodes 1 --qos shared_interactive --time 04:00:00 --constraint cpu -c 64 --mem 100GB --account=m4135
+
+module load conda 
+conda activate DIVER_test
+
+cd /global/cfs/cdirs/m4727/DANNY_EVCUATE_SEMANTIC_DECODING_FROM_NERSC_FOR_A_WHILE/semantic_decoding_neurobaby_lm_ver/nonlinear_multimodal_brain_encoding_model/main_experiment
+
+python train_EM_for_main.py --subject S1 --stim_setting LLAMA7B_12 --enc_setting default --resp_setting PCA_10
+
+
+python evaluate_encoder.py --subject S1 --stim_setting LLAMA7B_12 --enc_setting default --resp_setting PCA_10 --initial_trim 40
+
+
+
+#* below : default, takes too long...
+python train_EM_for_main.py --subject S1 --stim_setting LLAMA7B_12 --enc_setting default --resp_setting default
+
+python extract_and_save_LLAMA_features.py --model_name babylm/babyllama-10m-2024 --story_partition 0 
+
+
+```
+
+
+
 This repository contains the code for the paper "Aligning the Brain with Language Models Through a Nonlinear and Multimodal Approach". The code implements methods for encoding brain activity using language models through nonlinear and multimodal approaches. This code is loosely based on [Scaling laws for language encoding models in fMRI](https://arxiv.org/abs/2305.11863) ([GitHub repository](https://github.com/HuthLab/encoding-model-scaling-laws)).
 ## Setup
 

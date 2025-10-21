@@ -22,6 +22,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "./ridge_utils/"))
 import argparse
 import config 
 
+from huggingface_hub import login
+login("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")
+
 # add_space_to_wordseqjbl, adhoc implementation: For use with LLAMA3, empty string needs to be added at the beginning of wordseqs... (since tokenization helper assumes there's a " " in front of each word) Some items are missing this, so add it and save updated wordseqs!
 #! run this!! (Actually no need any more.. just here for recordkeeping purposes)
 def update_word_seq_and_save(): 
@@ -112,6 +115,7 @@ if __name__ == "__main__":
             inputs['attention_mask'] = torch.ones(inputs['input_ids'].shape).to(model.device)
             with torch.no_grad():
                 out = list(model(**inputs, output_hidden_states=True)[2]) #list of hidden states (layer by layer)
+                print("Processing phrase:", model.device)
             for layer_num in range(num_layers):
                 out_layer = out[layer_num][0].cpu().detach().numpy() # Extract layer by layer! Should functionalize this and use for loop to get each layer!?
                 out_layer = np.array(out_layer)
