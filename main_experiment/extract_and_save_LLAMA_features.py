@@ -108,7 +108,7 @@ if __name__ == "__main__":
     num_layers = model.config.num_hidden_layers
     text_dict3_list = [text_dict3.copy() for _ in range(num_layers)]
     start_time = time.time()
-    for phrase in text_dict2:
+    for phrase in tqdm(text_dict2.keys(), desc="Extracting Features"):
         if text_dict2[phrase]:
             inputs = {}
             inputs['input_ids'] = torch.tensor([text_dict[phrase]]).int().to(model.device) # Load token input ids for the corresponding phrase
@@ -131,8 +131,12 @@ if __name__ == "__main__":
     
     # Convert back from dictionary to matrix
     for layer_num in tqdm(range(num_layers)):
-    # for layer_num in range(num_layers):
-        feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num]) #, llama_version = llama_version)
+        #feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num], llama_version = llama_version)
+        feats, ds_feats = convert_to_feature_mats_robust(
+            wordseqs,
+            text_dict,
+            text_dict3_list[layer_num]
+        )
         
         model_file_name = model_name.replace("/", "_")
         os.makedirs(os.path.join(config.STIM_FEATURE_EXTRACTED_DIR, model_file_name), exist_ok = True)
