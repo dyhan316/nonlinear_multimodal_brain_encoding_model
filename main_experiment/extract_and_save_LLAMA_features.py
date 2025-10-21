@@ -22,9 +22,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "./ridge_utils/"))
 import argparse
 import config 
 
-from huggingface_hub import login
-login("<PLZ PUT IN YOUR HUGGINGFACE TOKEN>")
-
 # add_space_to_wordseqjbl, adhoc implementation: For use with LLAMA3, empty string needs to be added at the beginning of wordseqs... (since tokenization helper assumes there's a " " in front of each word) Some items are missing this, so add it and save updated wordseqs!
 #! run this!! (Actually no need any more.. just here for recordkeeping purposes)
 def update_word_seq_and_save(): 
@@ -108,7 +105,7 @@ if __name__ == "__main__":
     num_layers = model.config.num_hidden_layers
     text_dict3_list = [text_dict3.copy() for _ in range(num_layers)]
     start_time = time.time()
-    for phrase in text_dict2:
+    for phrase in tqdm(text_dict2.keys(), desc="Extracting Features"):
         if text_dict2[phrase]:
             inputs = {}
             inputs['input_ids'] = torch.tensor([text_dict[phrase]]).int().to(model.device) # Load token input ids for the corresponding phrase
@@ -130,8 +127,12 @@ if __name__ == "__main__":
     
     # Convert back from dictionary to matrix
     for layer_num in tqdm(range(num_layers)):
-    # for layer_num in range(num_layers):
-        feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num], llama_version = llama_version)
+        #feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num], llama_version = llama_version)
+        feats, ds_feats = convert_to_feature_mats_robust(
+            wordseqs,
+            text_dict,
+            text_dict3_list[layer_num]
+        )
         
         model_file_name = model_name.replace("/", "_")
         os.makedirs(os.path.join(config.STIM_FEATURE_EXTRACTED_DIR, model_file_name), exist_ok = True)
