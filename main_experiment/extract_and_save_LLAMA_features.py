@@ -1,6 +1,7 @@
 import os 
 import config 
 #OPT
+import re
 
 import joblib 
 import numpy as np
@@ -10,7 +11,7 @@ import ridge_utils
 from ridge_utils.util import make_delayed
 
 from ridge_utils.dsutils import make_word_ds
-from ridge_utils.tokenization_helpers import generate_efficient_feat_dicts_llama, convert_to_feature_mats_llama
+from ridge_utils.tokenization_helpers import *
 import time
 import os 
 from tqdm import tqdm
@@ -20,6 +21,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "./ridge_utils/"))
 
 import argparse
 import config 
+
+from huggingface_hub import login
+login("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")
 
 # add_space_to_wordseqjbl, adhoc implementation: For use with LLAMA3, empty string needs to be added at the beginning of wordseqs... (since tokenization helper assumes there's a " " in front of each word) Some items are missing this, so add it and save updated wordseqs!
 #! run this!! (Actually no need any more.. just here for recordkeeping purposes)
@@ -39,31 +43,32 @@ parser.add_argument("--model_name", type = str, required = False, default = "hug
 parser.add_argument('--story_partition', type = int, required=True) # From 0 to 5! In units of 20! 
 args = parser.parse_args()
 
-###for figuring out the model tokenizer id relationship (for expanding to LLAMA)
-model_list = ["huggyllama/llama-7b", "huggyllama/llama-13b", "huggyllama/llama-30b", "huggyllama/llama-65b",
-              "meta-llama/Llama-2-7b-hf", "meta-llama/Llama-2-13b-hf","meta-llama/Llama-2-70b-hf", 
-              "meta-llama/Meta-Llama-3-8B" , "meta-llama/Meta-Llama-3-70B"]
-for model in model_list : 
-    tokenizer = AutoTokenizer.from_pretrained(model) # Same tokenizer for all sizes
-    inputs = tokenizer('I reached over 8 thereare hi my name is 8', return_tensors="pt")
-    print(f"model : {model} | tokenizer id : {inputs['input_ids']}")
-    print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
-    print(tokenizer.decode(inputs['input_ids'][0]))
-    print('='*10)
-    
-    
-    inputs = tokenizer(' ', return_tensors="pt")
-    print(f"model : {model} | tokenizer id : {inputs['input_ids']}")
-    print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
-    print(tokenizer.decode(inputs['input_ids'][0]))
-    print('='*10)
-    
-    inputs = tokenizer('', return_tensors="pt")
-    print(f"model : {model} | tokenizer id : {inputs['input_ids']}")
-    print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
-    print(tokenizer.decode(inputs['input_ids'][0]))
-    print('===='*10)
-###
+####for figuring out the model tokenizer id relationship (for expanding to LLAMA)
+#model_list = ["huggyllama/llama-7b", "huggyllama/llama-13b", "huggyllama/llama-30b", "huggyllama/llama-65b",
+#              "meta-llama/Llama-2-7b-hf", "meta-llama/Llama-2-13b-hf","meta-llama/Llama-2-70b-hf",
+#              "meta-llama/Meta-Llama-3-8B" , "meta-llama/Meta-Llama-3-70B"]
+#for model in model_list :
+#    tokenizer = AutoTokenizer.from_pretrained(model) # Same tokenizer for all sizes
+#    inputs = tokenizer('I reached over 8 thereare hi my name is 8', return_tensors="pt")
+#    print(f"model : {model} | tokenizer id : {inputs['input_ids']}")
+#    print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
+#    print(tokenizer.decode(inputs['input_ids'][0]))
+#    print('='*10)
+#
+#
+#    inputs = tokenizer(' ', return_tensors="pt")
+#    print(f"model : {model} | tokenizer id : {inputs['input_ids']}")
+#    print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
+#    print(tokenizer.decode(inputs['input_ids'][0]))
+#    print('='*10)
+#
+#    inputs = tokenizer('', return_tensors="pt")
+#    print(f"model : {model} | tokenizer id : {inputs['input_ids']}")
+#    print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
+#    print(tokenizer.decode(inputs['input_ids'][0]))
+#    print('===='*10)
+####
+
 
 wordseqs = joblib.load("ridge_utils/updated_wordseqs.jbl") # Load wordseqs containing story annotations
 
@@ -82,17 +87,18 @@ model_name = args.model_name
 tokenizer = AutoTokenizer.from_pretrained(model_name) # Same tokenizer for all sizes
 
 # Make dictionary to align tokens and words
-if model_name == "facebook/opt-125m":
-    text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_opt(wordseqs, tokenizer, 256, 512)
-elif "Llama-3" in model_name:
-    llama_version = 3
-elif "Llama-2" in model_name: 
-    llama_version = 2
-elif "huggyllama" in model_name: 
-    llama_version = 1
-else : 
-    raise NotImplementedError
-text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_llama(wordseqs, tokenizer, 256, 512, llama_version = llama_version)
+#if model_name == "facebook/opt-125m":
+#    text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_opt(wordseqs, tokenizer, 256, 512)
+#elif "Llama-3" in model_name:
+#    llama_version = 3
+#elif "Llama-2" in model_name: 
+#    llama_version = 2
+#elif "huggyllama" in model_name: 
+#    llama_version = 1
+#else : 
+#    raise NotImplementedError
+text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_robust(wordseqs, tokenizer, 256, 512)
+#text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_llama(wordseqs, tokenizer, 256, 512)
 
 if __name__ == "__main__":
     model = AutoModelForCausalLM.from_pretrained(model_name, device_map = 'auto', torch_dtype = torch.float16) 
@@ -102,7 +108,7 @@ if __name__ == "__main__":
     num_layers = model.config.num_hidden_layers
     text_dict3_list = [text_dict3.copy() for _ in range(num_layers)]
     start_time = time.time()
-    for phrase in text_dict2:
+    for phrase in tqdm(text_dict2.keys(), desc="Extracting Features"):
         if text_dict2[phrase]:
             inputs = {}
             inputs['input_ids'] = torch.tensor([text_dict[phrase]]).int().to(model.device) # Load token input ids for the corresponding phrase
@@ -124,8 +130,12 @@ if __name__ == "__main__":
     
     # Convert back from dictionary to matrix
     for layer_num in tqdm(range(num_layers)):
-    # for layer_num in range(num_layers):
-        feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num], llama_version = llama_version)
+        #feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num], llama_version = llama_version)
+        feats, ds_feats = convert_to_feature_mats_robust(
+            wordseqs,
+            text_dict,
+            text_dict3_list[layer_num]
+        )
         
         model_file_name = model_name.replace("/", "_")
         os.makedirs(os.path.join(config.STIM_FEATURE_EXTRACTED_DIR, model_file_name), exist_ok = True)

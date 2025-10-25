@@ -4,7 +4,7 @@ import json
 
 import config
 from GPT import GPT
-from Decoder import Decoder, Hypothesis
+# from Decoder import Decoder, Hypothesis
 from LanguageModel import LanguageModel
 
 import matplotlib.pyplot as plt

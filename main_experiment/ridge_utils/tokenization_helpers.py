@@ -190,7 +190,6 @@ def convert_to_feature_mats_opt(wordseqs, tokenizer, lookback1, lookback2, text_
         downsampled_featureseqs[story] = featureseqs[story].chunksums('lanczos', window=3)
     return downsampled_featureseqs
 
-
 def compute_correct_tokens_llama(acc, acc_lookback, acc_offset, total_len):
     new_tokens = [1]
     acc_count_all = 0
@@ -245,10 +244,16 @@ def generate_efficient_feat_dicts_llama(wordseqs, tokenizer, lookback1, lookback
             else:
                 acc.append(i)
         decoded = tokenizer.decode(torch.tensor(acc))
+
         acc_words = 0
         for i in ds.data:
             if i.strip() != '':
                 acc_words += 1
+        acc_words_list = []
+
+        print("acc8: ", acc8)
+        print("acc_words: ", acc_words)
+
         #print(acc8, acc_words, story, es)
         assert acc8 == acc_words # Number of annotations should equal number of words
         acc.append(29947)
@@ -281,6 +286,36 @@ def generate_efficient_feat_dicts_llama(wordseqs, tokenizer, lookback1, lookback
             if i == total_len - 1:
                 text_dict2[(story, i)] = True
     return text_dict, text_dict2, text_dict3
+
+def compute_correct_tokens_portable(acc, acc_lookback, acc_offset, total_len, bos_token_id, dummy_token_id):
+    new_tokens = [bos_token_id]
+    acc_count_all = 0
+    first_word = max(0, acc_offset - acc_lookback)
+    last_word = min(acc_offset + 1, total_len)
+
+    acc_start = 0
+    while acc_start != first_word + 1:
+        if not acc or acc_count_all >= len(acc): break
+        if acc[acc_count_all] == dummy_token_id:
+            acc_start += 1
+            acc_count_all += 1
+        else:
+            acc_count_all += 1
+
+    acc2 = acc[acc_count_all:]
+    acc_count8 = 0
+    acc_count_all = 0
+
+    while acc_count8 != (last_word - first_word):
+        if not acc2 or acc_count_all >= len(acc2): break
+        if acc2[acc_count_all] == dummy_token_id:
+            acc_count8 += 1
+            acc_count_all += 1
+        else:
+            new_tokens.append(acc2[acc_count_all])
+            acc_count_all += 1
+
+    return new_tokens
 
 def convert_to_feature_mats_llama(wordseqs, tokenizer, lookback1, lookback2, text_dict3):
     text_dict = {}
@@ -353,3 +388,97 @@ def convert_to_feature_mats_llama(wordseqs, tokenizer, lookback1, lookback2, tex
         for story in featureseqs:
             downsampled_featureseqs[story] = featureseqs[story].chunksums('lanczos', window=3)
         return downsampled_featureseqs
+
+def convert_to_feature_mats_robust(wordseqs, text_dict, populated_text_dict3):
+    featureseqs = {}
+    for es, story in enumerate(wordseqs.keys()):
+        ds = wordseqs[story]
+        newdata = []
+        new_data_times = [] 
+        kept_indices = []
+        for i, w in enumerate(ds.data):
+            tokens_tuple = text_dict.get((story, i))
+            if tokens_tuple is not None:
+                feature_vector = populated_text_dict3.get(tokens_tuple)
+                if isinstance(feature_vector, np.ndarray):
+                    new_data_times.append(ds.data_times[i])
+                    kept_indices.append(i)
+                    newdata.append(feature_vector)
+
+        if newdata:
+            new_data_array = np.array(newdata)
+            new_data_times_array = np.array(new_data_times)
+            kept_indices_array = np.array(kept_indices)
+            new_split_inds = np.searchsorted(kept_indices_array, ds.split_inds)
+            featureseqs[story] = DataSequence(new_data_array, new_split_inds, new_data_times_array, ds.tr_times)
+
+    downsampled_featureseqs = {}
+    for story in featureseqs:
+        downsampled_featureseqs[story] = featureseqs[story].chunksums('lanczos', window=3)
+
+    return featureseqs, downsampled_featureseqs
+
+def generate_efficient_feat_dicts_robust(wordseqs, tokenizer, lookback1, lookback2):
+    BOS_TOKEN_ID = tokenizer.bos_token_id
+    
+    DUMMY_TOKEN_STR = "<|word_boundary|>"
+    if DUMMY_TOKEN_STR not in tokenizer.additional_special_tokens:
+        tokenizer.add_special_tokens({'additional_special_tokens': [DUMMY_TOKEN_STR]})
+    DUMMY_TOKEN_ID = tokenizer.convert_tokens_to_ids(DUMMY_TOKEN_STR)
+
+    text_dict, text_dict2, text_dict3 = {}, {}, {}
+    for es, story in enumerate(wordseqs.keys()):
+        ds = wordseqs[story]
+        
+        actual_words = [word for word in ds.data if word.strip() != '']
+        acc_words = len(actual_words)
+        total_len = acc_words
+
+        # 예: ['Sun', 'is'] -> "<|word_boundary|>Sun <|word_boundary|>is"
+        text_with_boundaries = " ".join([DUMMY_TOKEN_STR + word for word in ds.data if word.strip() != ''])
+        
+        inputs = tokenizer(text_with_boundaries, return_tensors="pt", add_special_tokens=False)
+        tokens = np.array(inputs['input_ids'][0])
+        
+        acc = [BOS_TOKEN_ID] + tokens.tolist()
+        
+        acc8 = np.count_nonzero(tokens == DUMMY_TOKEN_ID)
+        
+        print(f"acc8:  {acc8}")
+        print(f"acc_words:  {acc_words}")
+        assert acc8 == acc_words, f"Word count mismatch in '{story}': Counted {acc8} but expected {acc_words}"
+        
+        acc_lookback = 0
+        misc_offset = 0
+        new_tokens = [BOS_TOKEN_ID]
+        
+        word_idx_counter = 0
+        for i, w in enumerate(ds.data):
+            if w.strip() != '' and w != "'s":
+                if acc_lookback < lookback1 or (lookback2 > acc_lookback and acc_lookback >= lookback1):
+                    new_tokens_tuple = tuple(compute_correct_tokens_portable(acc, acc_lookback, word_idx_counter, total_len, BOS_TOKEN_ID, DUMMY_TOKEN_ID))
+                    text_dict[(story, i)] = new_tokens_tuple
+                    text_dict2[(story, i)] = False
+                    text_dict3[new_tokens_tuple] = False
+                elif acc_lookback == lookback2:
+                    new_tokens_tuple = tuple(compute_correct_tokens_portable(acc, acc_lookback, word_idx_counter, total_len, BOS_TOKEN_ID, DUMMY_TOKEN_ID))
+                    acc_lookback = lookback1
+                    text_dict[(story, i)] = new_tokens_tuple
+                    text_dict2[(story, i)] = True
+                    text_dict3[new_tokens_tuple] = False
+                else:
+                    assert False
+                word_idx_counter += 1
+            else:
+                new_tokens_tuple = tuple(new_tokens)
+                text_dict[(story, i)] = new_tokens_tuple
+                text_dict2[(story, i)] = True
+                text_dict3[new_tokens_tuple] = False
+                acc_lookback += 1
+                misc_offset -= 1
+                continue
+            acc_lookback += 1
+            if i == len(ds.data) - 1:
+                text_dict2[(story, i)] = True
+                
+    return text_dict, text_dict2, text_dict3

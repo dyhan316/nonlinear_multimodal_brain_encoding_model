@@ -9,7 +9,7 @@ from torch.nn.functional import softmax
 
 import config
 from huggingface_hub import login
-login("<PLZ PUT IN YOUR HUGGINGFACE TOKEN>") #! must be done 
+login("<PLZ PUT IN YOUR HUGGINGFACE TOKEN>")
 
 class LLM():
     """wrapper for LLaMA model from Meta, available on Hugging Face
