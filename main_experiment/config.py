@@ -68,7 +68,7 @@ WINDOW = 20
 
 # model that can be used 
 LLM_MODEL_LIST = ['GPT1', 'GPT2', 'LLAMA7B', 'LLAMA13B', 'LLAMA30B', 'LLAMA65B', 
- 'LLAMA27Bhf', "LLAMA213Bhf", "LLAMA270Bhf" ,'LLAMA38B', 'LLAMA370B', 'ds_no_front_trim']
+ 'LLAMA27Bhf', "LLAMA213Bhf", "LLAMA270Bhf" ,'LLAMA38B', 'LLAMA370B', 'ds_no_front_trim', 'babylm-babyllama-10m-2024']
 AUDIO_MODEL_LIST = ["whisper-tiny", "whisper-small", "whisper-base", "whisper-large", 
                     "whisper-large-v2", "whisper-large-v3",  #! same num params but newer.. try this?
                     "wavlm-base", "wavlm-base-plus", "wavlm-large",
@@ -83,6 +83,7 @@ NUM_LAYERS_DICT = {
     'LLAMA13B' : 40 - 1, #do LLMs later 
     'LLAMA30B' : 60 - 1, #do LLMs later 
     'LLAMA65B' : 80 - 1, #do LLMs later 
+    'babylm-babyllama-10m-2024' : 16,
     # audio model num_layers: +1 is added! (because of the embedding layer I think)
     'whisper-tiny' : 5,
     'whisper-small' : 13,
@@ -231,7 +232,6 @@ def misc_initialize(misc_args_str):
             
 def stim_initialize(stim_setting, setting, name):
     global LLM_MODEL_LIST, AUDIO_MODEL_LIST
-    
     ###################===LANGUAGE STIMS (LLMs)===##################
     #setting here would be S_SETTINGS or S_SETTINGS_2
     if stim_setting == "default":
@@ -248,7 +248,12 @@ def stim_initialize(stim_setting, setting, name):
         setting['S_MODEL'] = s_model
         setting['FEATURE_LAYER'] = feature_layer
         setting['HF_MODEL_NAME'] = hf_model_name
-    
+    elif stim_setting.startswith("babylm-babyllama-10m-2024") :
+        s_model, feature_layer, hf_model_name = parse_llama_settings(stim_setting)
+        assert s_model in LLM_MODEL_LIST
+        setting['S_MODEL'] = s_model
+        setting['FEATURE_LAYER'] = feature_layer
+        setting['HF_MODEL_NAME'] = hf_model_name
     ###################===AUDIO STIMS===##################
     ##audio models #! may need to add more audio options?
     elif any(stim_setting.startswith(model) for model in AUDIO_MODEL_LIST): 
@@ -585,9 +590,9 @@ def parse_llama_settings(stim_setting):
         "LLAMA213Bhf": "meta-llama/Llama-2-13b-hf",
         "LLAMA270Bhf": "meta-llama/Llama-2-70b-hf",
         "LLAMA38B": "meta-llama/Meta-Llama-3-8B",
-        "LLAMA370B": "meta-llama/Meta-Llama-3-70B"
+        "LLAMA370B": "meta-llama/Meta-Llama-3-70B",
+        'babylm-babyllama-10m-2024' : 'babylm/babyllama-10m-2024'
     }
-    
     for prefix, hf_model_name in llama_models.items():
         if stim_setting.startswith(prefix):
             feature_layer = int(stim_setting.split('_')[1])

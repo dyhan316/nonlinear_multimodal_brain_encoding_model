@@ -115,7 +115,6 @@ if __name__ == "__main__":
             inputs['attention_mask'] = torch.ones(inputs['input_ids'].shape).to(model.device)
             with torch.no_grad():
                 out = list(model(**inputs, output_hidden_states=True)[2]) #list of hidden states (layer by layer)
-                print("Processing phrase:", model.device)
             for layer_num in range(num_layers):
                 out_layer = out[layer_num][0].cpu().detach().numpy() # Extract layer by layer! Should functionalize this and use for loop to get each layer!?
                 out_layer = np.array(out_layer)

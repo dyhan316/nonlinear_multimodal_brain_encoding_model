@@ -19,7 +19,14 @@ python evaluate_encoder.py --subject S1 --stim_setting LLAMA7B_12 --enc_setting 
 #* below : default, takes too long...
 python train_EM_for_main.py --subject S1 --stim_setting LLAMA7B_12 --enc_setting default --resp_setting default
 
+
+
+#salloc --nodes 1 --qos shared_interactive --time 04:00:00 --constraint gpu -c 32 --gpus 1 --account=m4135
 python extract_and_save_LLAMA_features.py --model_name babylm/babyllama-10m-2024 --story_partition 0 
+
+python train_EM_for_main.py --subject S1 --stim_setting babylm-babyllama-10m-2024_7 --enc_setting default --resp_setting default
+
+python evaluate_encoder.py --subject S1 --stim_setting babylm-babyllama-10m-2024_7 --enc_setting default --resp_setting default
 
 
 ```

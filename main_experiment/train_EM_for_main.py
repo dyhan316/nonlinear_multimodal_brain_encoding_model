@@ -11,13 +11,12 @@ from utils_stim import get_stim, load_stim_features
 from utils_resp import get_resp
 from utils_ridge.ridge import ridge, bootstrap_ridge
 import tqdm #not used, but use later if needed
-import wandb #not used, but use later if needed
-import time  #not used, but use later if needed
+# import wandb #not used, but use later if needed
+# import time  #not used, but use later if needed
 
 from DNN import DNN_main
 import joblib
 np.random.seed(42)
-
 def legacy_when_default_stim(args, stories ,stacked = True): 
     # load gpt (here GPT could be LLM or GPT)
     gpt = get_stim_model(args, config.S_SETTINGS['audio_or_LLM'], config.S_SETTINGS)
