@@ -9,7 +9,7 @@ import numpy as np
 
 # exp_result_dir = "/path/to/exp_results"
 # exp_result_dir = "/alternative/path/to/exp_results"
-exp_result_dir = '/path/to/your/semantic_decoding_data/exp_results'
+exp_result_dir = '/pscratch/sd/a/ahhyun/NeuroBabyLM/encresult_1022'
 score_folder_paths = glob(exp_result_dir + "/*/*/scores")
 
 sub_list = ["S1", "S2", "S3"]
