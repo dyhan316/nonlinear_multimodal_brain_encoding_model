@@ -7,11 +7,12 @@ from DNN.model import utils_transformer
 from DNN.data import ConcatDataset, CombineDataset
 from functools import partial
 import re
+import warnings
 from typing import Dict, Any
 
 # paths
 # Set your data directory path here
-REPO_DIR = "/global/cfs/cdirs/m4727/DANNY_EVCUATE_SEMANTIC_DECODING_FROM_NERSC_FOR_A_WHILE/semantic_decoding_data"
+REPO_DIR = "/scratch/connectome/ahhyun724/NeuroBabyLM/data_and_weights"
 # Alternative path configuration:
 # REPO_DIR = "/alternative/path/to/semantic_decoding_data"
 DATA_LM_DIR = os.path.join(REPO_DIR, "data_lm")
@@ -243,14 +244,26 @@ def stim_initialize(stim_setting, setting, name):
         setting['LLM_CHECKPOINT'] = "openai-community/gpt2"
         setting['LLM_TOKENIZER'] = "openai-community/gpt2"
     elif stim_setting.startswith("LLAMA") :
-        s_model, feature_layer, hf_model_name = parse_llama_settings(stim_setting)
+        s_model, feature_layer, hf_model_name = parse_general_settings(stim_setting)
         assert s_model in LLM_MODEL_LIST
         setting['S_MODEL'] = s_model
         setting['FEATURE_LAYER'] = feature_layer
         setting['HF_MODEL_NAME'] = hf_model_name
-    elif stim_setting.startswith("babylm-babyllama-10m-2024") :
-        s_model, feature_layer, hf_model_name = parse_llama_settings(stim_setting)
-        assert s_model in LLM_MODEL_LIST
+    elif stim_setting.startswith("huggyllama") : #!TODO : can be merged (huggyllama, babylm, EleutherAI)
+        s_model, feature_layer, hf_model_name = parse_general_settings(stim_setting)
+        #assert s_model in LLM_MODEL_LIST
+        setting['S_MODEL'] = s_model
+        setting['FEATURE_LAYER'] = feature_layer
+        setting['HF_MODEL_NAME'] = hf_model_name
+    elif stim_setting.startswith("babylm") : # changed from ("babylm-babyllama-10m-2024") after feature extraction
+        s_model, feature_layer, hf_model_name = parse_general_settings(stim_setting)
+        #assert s_model in LLM_MODEL_LIST
+        setting['S_MODEL'] = s_model
+        setting['FEATURE_LAYER'] = feature_layer
+        setting['HF_MODEL_NAME'] = hf_model_name
+    elif stim_setting.startswith("EleutherAI") :
+        s_model, feature_layer, hf_model_name = parse_general_settings(stim_setting)
+        #assert s_model in LLM_MODEL_LIST
         setting['S_MODEL'] = s_model
         setting['FEATURE_LAYER'] = feature_layer
         setting['HF_MODEL_NAME'] = hf_model_name
@@ -290,7 +303,9 @@ def stim_initialize(stim_setting, setting, name):
     elif setting['S_MODEL'] in AUDIO_MODEL_LIST:
         setting['audio_or_LLM'] = "audio"
     else : 
-        raise ValueError(f"setting {stim_setting} not implemented yet... must specify whether audio or LLM")
+        setting['audio_or_LLM'] = "LLM"
+        warnings.warn("HARCODED setting['audio_or_LLM'] as LLM")
+        #raise ValueError(f"setting {stim_setting} not implemented yet... must specify whether audio or LLM")
 
 def resp_initialize(resp_setting, name):
     global VOXELS, R_SETTINGS
@@ -578,6 +593,22 @@ def reverse_format_name(formatted_name):
     original_name = ' '.join(args)
 
     return original_name
+
+def parse_general_settings(stim_setting):
+    if stim_setting.startswith("huggyllama") or stim_setting.startswith("meta-llama"):
+        #! lucy changed below in TRAIN step. worked fine with parse_llama_settings for extract_features
+        stim_prefix = stim_setting.split('_')[0]
+        feature_layer = int(stim_setting.split('_')[1])
+        hf_model_name = stim_prefix.replace('/', '_', 1)
+        return stim_prefix, feature_layer, hf_model_name
+        #return parse_llama_settings(stim_setting)
+    else: #for other models
+        #hf_model_name = stim_setting.replace('/', '-', 1)
+        stim_prefix = stim_setting.split('_')[0]
+        feature_layer = int(stim_setting.split('_')[1])
+        hf_model_name = stim_prefix.replace('/', '_', 1)
+        return stim_prefix, feature_layer, hf_model_name
+
 
 def parse_llama_settings(stim_setting):
     # Mapping of LLAMA model prefixes to their Hugging Face model names

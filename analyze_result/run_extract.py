@@ -6,11 +6,16 @@ import joblib
 import tqdm
 from concurrent.futures import ProcessPoolExecutor
 import numpy as np
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--date', type=str, default='1027', help='date of the experiment results to analyze')
+args = parser.parse_args()
 
 # exp_result_dir = "/path/to/exp_results"
 # exp_result_dir = "/alternative/path/to/exp_results"
-exp_result_dir = '/path/to/your/semantic_decoding_data/exp_results'
-score_folder_paths = glob(exp_result_dir + "/*/*/scores")
+exp_result_dir = '/scratch/connectome/ahhyun724/NeuroBabyLM/data_and_weights/exp_results' #! TODO : change this to your own path
+score_folder_paths = glob(exp_result_dir + "/*/*/*/scores")
 
 sub_list = ["S1", "S2", "S3"]
 all_results = pd.DataFrame()
@@ -98,4 +103,4 @@ if results:
     all_results = pd.concat(results)
 
 all_results = pd.concat(results)
-all_results.to_csv("all_results.csv", index=False)
+all_results.to_csv(f"all_results_{args.date}.csv", index=False)

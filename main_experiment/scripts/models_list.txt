@@ -1,0 +1,22 @@
+<encoder-only>
+babylm/ltgbert-100m-2024, num_layer=12
+babylm/ltgbert-10m-2024, num_layer=12
+babylm/roberta-base-strict-2023, num_layer=12 #! works 
+babylm/roberta-base-strict-small-2023, num_layer=12
+
+<decoder-only, text&image>
+babylm/flamingo-2024, num_layer=12
+
+<decoder-only, text>
+babylm/babyllama-100m-2024, num_layer=16 #! not progressing
+babylm/babyllama-10m-2024, num_layer=16
+babylm/t5-base-strict-2023, num_layer=12
+babylm/t5-base-strict-small-2023, num_layer=12
+babylm/opt-125m-strict-2023, num_layer=12
+babylm/opt-125m-strict-small-2023, num_layer=12
+
+BabyLM-community/babylm-interaction-baseline-simpo, num_layer = 12
+BabyLM-community/babylm-multimodal-baseline-flamingo-old, num_layer=12
+BabyLM-community/babylm-baseline-10m-gpt2, num_layer=12
+BabyLM-community/babylm-baseline-10m-gpt-bert-masked-focus, num_layer=12
+BabyLM-community/babylm-baseline-10m-gpt-bert-mixed, num_layer=12

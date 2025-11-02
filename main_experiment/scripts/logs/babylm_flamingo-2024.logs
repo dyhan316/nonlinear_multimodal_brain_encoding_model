@@ -1,0 +1,89 @@
+Extracting features for model: babylm/flamingo-2024, story partition: 0
+/scratch/connectome/ahhyun724/NeuroBabyLM/data_and_weights/extracted_stim_features
+acc8:  696
+acc_words:  696
+acc8:  2072
+acc_words:  2072
+acc8:  2297
+acc_words:  2297
+acc8:  1553
+acc_words:  1553
+acc8:  2084
+acc_words:  2084
+acc8:  1210
+acc_words:  1210
+acc8:  886
+acc_words:  886
+acc8:  1729
+acc_words:  1729
+acc8:  1982
+acc_words:  1982
+acc8:  1925
+acc_words:  1925
+acc8:  1916
+acc_words:  1916
+acc8:  1691
+acc_words:  1691
+acc8:  2219
+acc_words:  2219
+acc8:  2680
+acc_words:  2680
+acc8:  1698
+acc_words:  1698
+acc8:  2984
+acc_words:  2984
+acc8:  1078
+acc_words:  1078
+acc8:  837
+acc_words:  837
+acc8:  1348
+acc_words:  1348
+acc8:  2531
+acc_words:  2531
+acc8:  2174
+acc_words:  2174
+acc8:  1679
+acc_words:  1679
+acc8:  1375
+acc_words:  1375
+acc8:  1356
+acc_words:  1356
+acc8:  2340
+acc_words:  2340
+acc8:  1940
+acc_words:  1940
+acc8:  1437
+acc_words:  1437
+acc8:  1964
+acc_words:  1964
+acc8:  2785
+acc_words:  2785
+acc8:  3082
+acc_words:  3082
+You are using a model of type opt to instantiate a model of type flamingo. This is not supported for all configurations of models and can yield errors.
+A new version of the following files was downloaded from https://huggingface.co/babylm/flamingo-2024:
+- flamingo_pytorch.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+pytorch_model.bin: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 1.02G/1.02G [00:49<00:00, 20.6MB/s]
+Instantiating OPTAttention without passing a `layer_idx` is not recommended and will lead to errors during the forward call if caching is used. Please make sure to provide a `layer_idx` when creating this class.
+config.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████| 454/454 [00:00<00:00, 1.85MB/s]
+pytorch_model.bin: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 343M/343M [00:18<00:00, 18.7MB/s]
+Some weights of ViTModel were not initialized from the model checkpoint at facebook/dino-vitb16 and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+        - Avoid using `tokenizers` before the fork if possible
+        - Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+        - Avoid using `tokenizers` before the fork if possible
+        - Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+generation_config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 132/132 [00:00<00:00, 819kB/s]
+/scratch/connectome/ahhyun724/NeuroBabyLM/nonlinear_multimodal_brain_encoding_model/main_experiment/extract_and_save_LLAMA_features.py:107: UserWarning: ⚠️trust_remote_code is set to True. Make sure you trust the source of the model.
+  warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
+Extracting Features:   0%|                                                                                                           | 0/55585 [00:00<?, ?it/s]
+Traceback (most recent call last):                                                                                                   | 0/55585 [00:00<?, ?it/s]
+  File "/scratch/connectome/ahhyun724/NeuroBabyLM/nonlinear_multimodal_brain_encoding_model/main_experiment/extract_and_save_LLAMA_features.py", line 129, in <module>
+    inputs['input_ids'] = torch.tensor([text_dict[phrase]]).int().to(model.device) # Load token input ids for the corresponding phrase
+RuntimeError: Could not infer dtype of NoneType
+model.safetensors: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 343M/343M [00:21<00:00, 16.2MB/s]

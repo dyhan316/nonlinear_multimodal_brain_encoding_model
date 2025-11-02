@@ -6,7 +6,7 @@ import re
 import joblib 
 import numpy as np
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForMaskedLM
 import ridge_utils
 from ridge_utils.util import make_delayed
 
@@ -21,9 +21,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "./ridge_utils/"))
 
 import argparse
 import config 
+import warnings
 
-from huggingface_hub import login
-login("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")
+# from huggingface_hub import login
+# login("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")
 
 # add_space_to_wordseqjbl, adhoc implementation: For use with LLAMA3, empty string needs to be added at the beginning of wordseqs... (since tokenization helper assumes there's a " " in front of each word) Some items are missing this, so add it and save updated wordseqs!
 #! run this!! (Actually no need any more.. just here for recordkeeping purposes)
@@ -101,7 +102,22 @@ text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_robust(wordseq
 #text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_llama(wordseqs, tokenizer, 256, 512)
 
 if __name__ == "__main__":
-    model = AutoModelForCausalLM.from_pretrained(model_name, device_map = 'auto', torch_dtype = torch.float16) 
+    #import pdb ; pdb.set_trace()
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map = 'auto', dtype = torch.float16, trust_remote_code = True) 
+    warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
+
+    #! lucy added below. might be needed for processing models like BERT style, t5 .. Not working yet tho
+    # if "llama" in model_name.lower():
+    #     model = AutoModelForCausalLM.from_pretrained(model_name, device_map = 'auto', dtype = torch.float16, trust_remote_code = True) 
+    #     warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
+    # elif "bert" in model_name.lower():# or "roberta" in model_name.lower(): e.g."'babylm/ltgbert-100m-2024'"
+    #     model = AutoModelForMaskedLM.from_pretrained(model_name, dtype = torch.float16, trust_remote_code = True) 
+    #     if torch.cuda.is_available():
+    #         model = model.cuda()
+    #     else:
+    #         print("CUDA not available. Model is on CPU.")
+    #     warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
+   
     model.eval()
     # We will extract features from the 9th layer of the model
     # LAYER_NUM = 9
