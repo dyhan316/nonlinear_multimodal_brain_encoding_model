@@ -103,7 +103,10 @@ text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_robust(wordseq
 
 if __name__ == "__main__":
     #import pdb ; pdb.set_trace()
-    model = AutoModelForCausalLM.from_pretrained(model_name, device_map = 'auto', dtype = torch.float16, trust_remote_code = True) 
+    model = AutoModelForMaskedLM.from_pretrained(model_name, 
+                                    device_map = 'cuda',
+                                    dtype = torch.float16,
+                                    trust_remote_code = True) 
     warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
 
     #! lucy added below. might be needed for processing models like BERT style, t5 .. Not working yet tho
@@ -130,7 +133,9 @@ if __name__ == "__main__":
             inputs['input_ids'] = torch.tensor([text_dict[phrase]]).int().to(model.device) # Load token input ids for the corresponding phrase
             inputs['attention_mask'] = torch.ones(inputs['input_ids'].shape).to(model.device)
             with torch.no_grad():
-                out = list(model(**inputs, output_hidden_states=True)[2]) #list of hidden states (layer by layer)
+                #out = list(model(**inputs, output_hidden_states=True)[2]) #list of hidden states (layer by layer)
+                outputs = model(**inputs, output_hidden_states=True)
+                out = list(outputs.hidden_states)
             for layer_num in range(num_layers):
                 out_layer = out[layer_num][0].cpu().detach().numpy() # Extract layer by layer! Should functionalize this and use for loop to get each layer!?
                 out_layer = np.array(out_layer)

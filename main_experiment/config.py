@@ -69,7 +69,8 @@ WINDOW = 20
 
 # model that can be used 
 LLM_MODEL_LIST = ['GPT1', 'GPT2', 'LLAMA7B', 'LLAMA13B', 'LLAMA30B', 'LLAMA65B', 
- 'LLAMA27Bhf', "LLAMA213Bhf", "LLAMA270Bhf" ,'LLAMA38B', 'LLAMA370B', 'ds_no_front_trim', 'babylm-babyllama-10m-2024']
+ 'LLAMA27Bhf', "LLAMA213Bhf", "LLAMA270Bhf" ,'LLAMA38B', 'LLAMA370B', 'ds_no_front_trim', 'babylm-babyllama-10m-2024'
+ 'babylm-ltgbert-10m-2024']
 AUDIO_MODEL_LIST = ["whisper-tiny", "whisper-small", "whisper-base", "whisper-large", 
                     "whisper-large-v2", "whisper-large-v3",  #! same num params but newer.. try this?
                     "wavlm-base", "wavlm-base-plus", "wavlm-large",
@@ -85,6 +86,7 @@ NUM_LAYERS_DICT = {
     'LLAMA30B' : 60 - 1, #do LLMs later 
     'LLAMA65B' : 80 - 1, #do LLMs later 
     'babylm-babyllama-10m-2024' : 16,
+    'babylm-ltgbert-10m-2024': 12,
     # audio model num_layers: +1 is added! (because of the embedding layer I think)
     'whisper-tiny' : 5,
     'whisper-small' : 13,
@@ -622,7 +624,8 @@ def parse_llama_settings(stim_setting):
         "LLAMA270Bhf": "meta-llama/Llama-2-70b-hf",
         "LLAMA38B": "meta-llama/Meta-Llama-3-8B",
         "LLAMA370B": "meta-llama/Meta-Llama-3-70B",
-        'babylm-babyllama-10m-2024' : 'babylm/babyllama-10m-2024'
+        'babylm-babyllama-10m-2024' : 'babylm/babyllama-10m-2024',
+        'babylm-ltgbert-10m-2024' : 'babylm/ltgbert-10m-2024'
     }
     for prefix, hf_model_name in llama_models.items():
         if stim_setting.startswith(prefix):
