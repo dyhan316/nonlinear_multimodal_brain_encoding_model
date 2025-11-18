@@ -24,7 +24,9 @@ def process_folder(folder_dir):
     results = {}
     if len(os.listdir(folder_dir)) != 3:
         print(f"not enough! not all scores were calculated, has {len(os.listdir(folder_dir))} scores {folder_dir}")
+        print("Skipping this folder.")
         return None
+    
 
     exp_info = folder_dir.split('/')[-3:-1]
     exp_info = "---".join(exp_info)

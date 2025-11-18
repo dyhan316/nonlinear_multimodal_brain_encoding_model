@@ -595,6 +595,10 @@ def reverse_format_name(formatted_name):
     return original_name
 
 def parse_general_settings(stim_setting):
+    feature_layer = int(stim_setting.split('_')[-1])
+    stim_prefix = stim_setting.rsplit('_', 1)[0]
+    hf_model_name = stim_prefix.replace('/', '_', 1)
+    return stim_prefix, feature_layer, hf_model_name
     if stim_setting.startswith("huggyllama") or stim_setting.startswith("meta-llama"):
         #! lucy changed below in TRAIN step. worked fine with parse_llama_settings for extract_features
         stim_prefix = stim_setting.split('_')[0]
@@ -604,6 +608,11 @@ def parse_general_settings(stim_setting):
         #return parse_llama_settings(stim_setting)
     else: #for other models
         #hf_model_name = stim_setting.replace('/', '-', 1)
+        if stim_setting.count('_') > 2:
+            feature_layer = int(stim_setting.split('_')[-1])
+            stim_prefix = stim_setting.rsplit('_', 1)[0]
+            hf_model_name = stim_prefix.replace('/', '_', 1)
+            return stim_prefix, feature_layer, hf_model_name
         stim_prefix = stim_setting.split('_')[0]
         feature_layer = int(stim_setting.split('_')[1])
         hf_model_name = stim_prefix.replace('/', '_', 1)
