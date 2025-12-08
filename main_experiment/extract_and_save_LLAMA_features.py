@@ -6,7 +6,8 @@ import re
 import joblib 
 import numpy as np
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForMaskedLM
+# from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForMaskedLM
+from transformers import AutoTokenizer, AutoModel
 import ridge_utils
 from ridge_utils.util import make_delayed
 
@@ -101,12 +102,50 @@ tokenizer = AutoTokenizer.from_pretrained(model_name) # Same tokenizer for all s
 text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_robust(wordseqs, tokenizer, 256, 512)
 #text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_llama(wordseqs, tokenizer, 256, 512)
 
+# --- START T5 FIX: SANITIZE DICTIONARIES ---
+print("🧹 Sanitizing dictionaries to remove NoneType tokens...")
+
+# 1. Clean text_dict (Values are tuples of tokens)
+for k in text_dict:
+    if text_dict[k] is not None:
+        # Keep only integers, remove None
+        text_dict[k] = tuple(x for x in text_dict[k] if x is not None)
+
+# 2. Clean text_dict3 (Keys are tuples of tokens)
+new_text_dict3 = {}
+for k in list(text_dict3.keys()):
+    # Create new key without None
+    new_k = tuple(x for x in k if x is not None)
+    if len(new_k) > 0:
+        new_text_dict3[new_k] = text_dict3[k]
+text_dict3 = new_text_dict3
+# --- END T5 FIX ---
+
+
+# --- DEBUG: CHECK WHAT IS INSIDE ---
+print("\nDEBUGGING DICTIONARY:")
+first_5_keys = list(text_dict.keys())[:5]
+for k in first_5_keys:
+    print(f"Phrase: '{k}'")
+    print(f"Token IDs: {text_dict[k]}")
+print("-----------------------------\n")
+# -----------------------------------
+
 if __name__ == "__main__":
     #import pdb ; pdb.set_trace()
-    model = AutoModelForMaskedLM.from_pretrained(model_name, 
-                                    device_map = 'cuda',
-                                    dtype = torch.float16,
-                                    trust_remote_code = True) 
+
+    # Universal AutoModel testing (Works for GPT, Llama)
+
+    # model = AutoModelForMaskedLM.from_pretrained(model_name, 
+    #                                 device_map = 'cuda',
+    #                                 dtype = torch.float16,
+    #                                 trust_remote_code = True) 
+
+    # Universal AutoModel (Works for T5, BERT, GPT, Llama)
+    model = AutoModel.from_pretrained(model_name, 
+                                device_map = 'cuda',
+                                dtype = torch.float16,
+                                trust_remote_code = True)
     warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
 
     #! lucy added below. might be needed for processing models like BERT style, t5 .. Not working yet tho
@@ -130,11 +169,23 @@ if __name__ == "__main__":
     for phrase in tqdm(text_dict2.keys(), desc="Extracting Features"):
         if text_dict2[phrase]:
             inputs = {}
+            if len(text_dict[phrase]) == 0:
+                continue
             inputs['input_ids'] = torch.tensor([text_dict[phrase]]).int().to(model.device) # Load token input ids for the corresponding phrase
             inputs['attention_mask'] = torch.ones(inputs['input_ids'].shape).to(model.device)
             with torch.no_grad():
                 #out = list(model(**inputs, output_hidden_states=True)[2]) #list of hidden states (layer by layer)
-                outputs = model(**inputs, output_hidden_states=True)
+                # outputs = model(**inputs, output_hidden_states=True)
+                
+                # --- START T5 FIX: USE ENCODER ONLY ---
+                if hasattr(model, "encoder") and hasattr(model, "decoder"):
+                    # For T5, BART, etc. -> Only run the encoder
+                    outputs = model.encoder(**inputs, output_hidden_states=True)
+                else:
+                    # For Llama, GPT, BERT -> Run normally
+                    outputs = model(**inputs, output_hidden_states=True)
+                # --- END T5 FIX ---
+
                 out = list(outputs.hidden_states)
             for layer_num in range(num_layers):
                 out_layer = out[layer_num][0].cpu().detach().numpy() # Extract layer by layer! Should functionalize this and use for loop to get each layer!?

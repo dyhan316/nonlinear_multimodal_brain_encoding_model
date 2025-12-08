@@ -104,5 +104,5 @@ results = [r for r in results if r is not None]
 if results:
     all_results = pd.concat(results)
 
-all_results = pd.concat(results)
+#all_results = pd.concat(results)
 all_results.to_csv(f"all_results_{args.date}.csv", index=False)
