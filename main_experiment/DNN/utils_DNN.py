@@ -1,7 +1,7 @@
 import argparse
 import datetime
 import re
-from torchinfo import summary
+# from torchinfo import summary
 import torch 
 from torch import nn
 import sys

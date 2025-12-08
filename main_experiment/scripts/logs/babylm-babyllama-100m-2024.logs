@@ -1,0 +1,117 @@
+Extracting features for model: babylm/babyllama-100m-2024, story partition: 0
+/scratch/connectome/ahhyun724/NeuroBabyLM/data_and_weights/extracted_stim_features
+tokenizer_config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 947/947 [00:00<00:00, 3.88MB/s]
+vocab.json: 236kB [00:00, 10.9MB/s]
+merges.txt: 134kB [00:00, 2.63MB/s]
+tokenizer.json: 641kB [00:00, 19.9MB/s]
+added_tokens.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 29.0/29.0 [00:00<00:00, 131kB/s]
+special_tokens_map.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████| 104/104 [00:00<00:00, 477kB/s]
+Token indices sequence length is longer than the specified maximum sequence length for this model (2426 > 128). Running this sequence through the model will result in indexing errors
+acc8:  696
+acc_words:  696
+acc8:  2072
+acc_words:  2072
+acc8:  2297
+acc_words:  2297
+acc8:  1553
+acc_words:  1553
+acc8:  2084
+acc_words:  2084
+acc8:  1210
+acc_words:  1210
+acc8:  886
+acc_words:  886
+acc8:  1729
+acc_words:  1729
+acc8:  1982
+acc_words:  1982
+acc8:  1925
+acc_words:  1925
+acc8:  1916
+acc_words:  1916
+acc8:  1691
+acc_words:  1691
+acc8:  2219
+acc_words:  2219
+acc8:  2680
+acc_words:  2680
+acc8:  1698
+acc_words:  1698
+acc8:  2984
+acc_words:  2984
+acc8:  1078
+acc_words:  1078
+acc8:  837
+acc_words:  837
+acc8:  1348
+acc_words:  1348
+acc8:  2531
+acc_words:  2531
+acc8:  2174
+acc_words:  2174
+acc8:  1679
+acc_words:  1679
+acc8:  1375
+acc_words:  1375
+acc8:  1356
+acc_words:  1356
+acc8:  2340
+acc_words:  2340
+acc8:  1940
+acc_words:  1940
+acc8:  1437
+acc_words:  1437
+acc8:  1964
+acc_words:  1964
+acc8:  2785
+acc_words:  2785
+acc8:  3082
+acc_words:  3082
+config.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████| 653/653 [00:00<00:00, 2.74MB/s]
+model.safetensors: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 233M/233M [00:16<00:00, 14.4MB/s]
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+        - Avoid using `tokenizers` before the fork if possible
+        - Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+        - Avoid using `tokenizers` before the fork if possible
+        - Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+generation_config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 132/132 [00:00<00:00, 593kB/s]
+/scratch/connectome/ahhyun724/NeuroBabyLM/nonlinear_multimodal_brain_encoding_model/main_experiment/extract_and_save_LLAMA_features.py:107: UserWarning: ⚠️trust_remote_code is set to True. Make sure you trust the source of the model.
+  warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
+Extracting Features: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 55585/55585 [26:35<00:00, 34.84it/s]
+Feature extraction took 1595.6526069641113 seconds on cuda:0
+  0%|                                                                                                                                   | 0/16 [00:00<?, ?it/s]Some stories are missing!!
+number of stories extracted : 30 out of 109
+  6%|███████▋                                                                                                                   | 1/16 [00:03<00:59,  3.93s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 12%|███████████████▍                                                                                                           | 2/16 [00:07<00:54,  3.90s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 19%|███████████████████████                                                                                                    | 3/16 [00:10<00:44,  3.46s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 25%|██████████████████████████████▊                                                                                            | 4/16 [00:13<00:39,  3.28s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 31%|██████████████████████████████████████▍                                                                                    | 5/16 [00:16<00:34,  3.11s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 38%|██████████████████████████████████████████████▏                                                                            | 6/16 [00:19<00:31,  3.14s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 44%|█████████████████████████████████████████████████████▊                                                                     | 7/16 [00:23<00:29,  3.28s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 50%|█████████████████████████████████████████████████████████████▌                                                             | 8/16 [00:26<00:26,  3.34s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 56%|█████████████████████████████████████████████████████████████████████▏                                                     | 9/16 [00:30<00:23,  3.34s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 62%|████████████████████████████████████████████████████████████████████████████▎                                             | 10/16 [00:33<00:20,  3.49s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 69%|███████████████████████████████████████████████████████████████████████████████████▉                                      | 11/16 [00:38<00:19,  3.82s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 75%|███████████████████████████████████████████████████████████████████████████████████████████▌                              | 12/16 [00:43<00:16,  4.04s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 81%|███████████████████████████████████████████████████████████████████████████████████████████████████▏                      | 13/16 [00:47<00:12,  4.21s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 88%|██████████████████████████████████████████████████████████████████████████████████████████████████████████▊               | 14/16 [00:51<00:07,  4.00s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+ 94%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍       | 15/16 [00:55<00:04,  4.24s/it]Some stories are missing!!
+number of stories extracted : 30 out of 109
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 16/16 [00:58<00:00,  3.66s/it]

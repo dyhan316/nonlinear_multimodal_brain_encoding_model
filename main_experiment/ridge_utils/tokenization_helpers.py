@@ -389,6 +389,35 @@ def convert_to_feature_mats_llama(wordseqs, tokenizer, lookback1, lookback2, tex
             downsampled_featureseqs[story] = featureseqs[story].chunksums('lanczos', window=3)
         return downsampled_featureseqs
 
+def convert_to_feature_mats_robust(wordseqs, text_dict, populated_text_dict3):
+    featureseqs = {}
+    for es, story in enumerate(wordseqs.keys()):
+        ds = wordseqs[story]
+        newdata = []
+        new_data_times = [] 
+        kept_indices = []
+        for i, w in enumerate(ds.data):
+            tokens_tuple = text_dict.get((story, i))
+            if tokens_tuple is not None:
+                feature_vector = populated_text_dict3.get(tokens_tuple)
+                if isinstance(feature_vector, np.ndarray):
+                    new_data_times.append(ds.data_times[i])
+                    kept_indices.append(i)
+                    newdata.append(feature_vector)
+
+        if newdata:
+            new_data_array = np.array(newdata)
+            new_data_times_array = np.array(new_data_times)
+            kept_indices_array = np.array(kept_indices)
+            new_split_inds = np.searchsorted(kept_indices_array, ds.split_inds)
+            featureseqs[story] = DataSequence(new_data_array, new_split_inds, new_data_times_array, ds.tr_times)
+
+    downsampled_featureseqs = {}
+    for story in featureseqs:
+        downsampled_featureseqs[story] = featureseqs[story].chunksums('lanczos', window=3)
+
+    return featureseqs, downsampled_featureseqs
+
 def generate_efficient_feat_dicts_robust(wordseqs, tokenizer, lookback1, lookback2):
     BOS_TOKEN_ID = tokenizer.bos_token_id
     

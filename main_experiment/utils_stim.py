@@ -83,7 +83,8 @@ def load_stim_features(stim_setting, S_SETTINGS, stories, layer, tr_stats = None
     #loading precomputed stuff
     if S_SETTINGS['audio_or_LLM'] == 'LLM' :
         hf_model_name = S_SETTINGS['HF_MODEL_NAME']
-        model_file_name = hf_model_name.replace("/", "_")
+        #model_file_name = hf_model_name.replace("/", "_")
+        model_file_name = hf_model_name
         
         #word_vecs : per token features, but not used when doing downsampling thing 
         word_vecs_path = os.path.join(config.STIM_FEATURE_EXTRACTED_DIR, model_file_name, f"feats_layer_{layer}.jbl")

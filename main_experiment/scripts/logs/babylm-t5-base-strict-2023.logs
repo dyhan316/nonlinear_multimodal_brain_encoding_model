@@ -1,0 +1,77 @@
+Extracting features for model: babylm/t5-base-strict-2023, story partition: 0
+/scratch/connectome/ahhyun724/NeuroBabyLM/data_and_weights/extracted_stim_features
+tokenizer_config.json: 2.38kB [00:00, 5.09MB/s]
+spiece.model: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 792k/792k [00:01<00:00, 614kB/s]
+tokenizer.json: 2.42MB [00:00, 27.2MB/s]
+special_tokens_map.json: 2.20kB [00:00, 5.81MB/s]
+Token indices sequence length is longer than the specified maximum sequence length for this model (2295 > 512). Running this sequence through the model will result in indexing errors
+acc8:  696
+acc_words:  696
+acc8:  2072
+acc_words:  2072
+acc8:  2297
+acc_words:  2297
+acc8:  1553
+acc_words:  1553
+acc8:  2084
+acc_words:  2084
+acc8:  1210
+acc_words:  1210
+acc8:  886
+acc_words:  886
+acc8:  1729
+acc_words:  1729
+acc8:  1982
+acc_words:  1982
+acc8:  1925
+acc_words:  1925
+acc8:  1916
+acc_words:  1916
+acc8:  1691
+acc_words:  1691
+acc8:  2219
+acc_words:  2219
+acc8:  2680
+acc_words:  2680
+acc8:  1698
+acc_words:  1698
+acc8:  2984
+acc_words:  2984
+acc8:  1078
+acc_words:  1078
+acc8:  837
+acc_words:  837
+acc8:  1348
+acc_words:  1348
+acc8:  2531
+acc_words:  2531
+acc8:  2174
+acc_words:  2174
+acc8:  1679
+acc_words:  1679
+acc8:  1375
+acc_words:  1375
+acc8:  1356
+acc_words:  1356
+acc8:  2340
+acc_words:  2340
+acc8:  1940
+acc_words:  1940
+acc8:  1437
+acc_words:  1437
+acc8:  1964
+acc_words:  1964
+acc8:  2785
+acc_words:  2785
+acc8:  3082
+acc_words:  3082
+config.json: 1.47kB [00:00, 3.09MB/s]
+Traceback (most recent call last):
+  File "/scratch/connectome/ahhyun724/NeuroBabyLM/nonlinear_multimodal_brain_encoding_model/main_experiment/extract_and_save_LLAMA_features.py", line 106, in <module>
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map = 'auto', dtype = torch.float16, trust_remote_code = True) 
+  File "/scratch/connectome/ahhyun724/.conda/envs/NeurobabyLM_copy/lib/python3.10/site-packages/transformers/models/auto/auto_factory.py", line 607, in from_pretrained
+    raise ValueError(
+ValueError: Unrecognized configuration class <class 'transformers.models.t5.configuration_t5.T5Config'> for this kind of AutoModel: AutoModelForCausalLM.
+Model type should be one of ApertusConfig, ArceeConfig, AriaTextConfig, BambaConfig, BartConfig, BertConfig, BertGenerationConfig, BigBirdConfig, BigBirdPegasusConfig, BioGptConfig, BitNetConfig, BlenderbotConfig, BlenderbotSmallConfig, BloomConfig, CamembertConfig, LlamaConfig, CodeGenConfig, CohereConfig, Cohere2Config, CpmAntConfig, CTRLConfig, Data2VecTextConfig, DbrxConfig, DeepseekV2Config, DeepseekV3Config, DiffLlamaConfig, DogeConfig, Dots1Config, ElectraConfig, Emu3Config, ErnieConfig, Ernie4_5Config, Ernie4_5_MoeConfig, Exaone4Config, FalconConfig, FalconH1Config, FalconMambaConfig, FuyuConfig, GemmaConfig, Gemma2Config, Gemma3Config, Gemma3TextConfig, Gemma3nConfig, Gemma3nTextConfig, GitConfig, GlmConfig, Glm4Config, Glm4MoeConfig, GotOcr2Config, GPT2Config, GPT2Config, GPTBigCodeConfig, GPTNeoConfig, GPTNeoXConfig, GPTNeoXJapaneseConfig, GptOssConfig, GPTJConfig, GraniteConfig, GraniteMoeConfig, GraniteMoeHybridConfig, GraniteMoeSharedConfig, HeliumConfig, HunYuanDenseV1Config, HunYuanMoEV1Config, JambaConfig, JetMoeConfig, Lfm2Config, LlamaConfig, Llama4Config, Llama4TextConfig, MambaConfig, Mamba2Config, MarianConfig, MBartConfig, MegaConfig, MegatronBertConfig, MiniMaxConfig, MistralConfig, MixtralConfig, MllamaConfig, ModernBertDecoderConfig, MoshiConfig, MptConfig, MusicgenConfig, MusicgenMelodyConfig, MvpConfig, NemotronConfig, OlmoConfig, Olmo2Config, OlmoeConfig, OpenLlamaConfig, OpenAIGPTConfig, OPTConfig, PegasusConfig, PersimmonConfig, PhiConfig, Phi3Config, Phi4MultimodalConfig, PhimoeConfig, PLBartConfig, ProphetNetConfig, QDQBertConfig, Qwen2Config, Qwen2MoeConfig, Qwen3Config, Qwen3MoeConfig, RecurrentGemmaConfig, ReformerConfig, RemBertConfig, RobertaConfig, RobertaPreLayerNormConfig, RoCBertConfig, RoFormerConfig, RwkvConfig, SeedOssConfig, SmolLM3Config, Speech2Text2Config, StableLmConfig, Starcoder2Config, TransfoXLConfig, TrOCRConfig, WhisperConfig, XGLMConfig, XLMConfig, XLMProphetNetConfig, XLMRobertaConfig, XLMRobertaXLConfig, XLNetConfig, xLSTMConfig, XmodConfig, ZambaConfig, Zamba2Config.
+Extracting features for model: babylm/t5-base-strict-2023, story partition: 1
+/scratch/connectome/ahhyun724/NeuroBabyLM/data_and_weights/extracted_stim_features
