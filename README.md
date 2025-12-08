@@ -5,3 +5,6 @@ This repository contains code for aligning brain activity with language models u
 **Directory structure:**
 - `/analyze_result/`: Contains `ANALYSIS.ipynb` and helper functions for result analysis and visualization
 - `/main_experiment/`: Contains implementation code for brain encoding experiments, including model training, evaluation, and feature extraction. Refer to the `README.md` inside of the `main_expeirment` for further detail.
+
+**Run Instrucitons**
+please run `main_experiemnt/scripts_clean.sh`
