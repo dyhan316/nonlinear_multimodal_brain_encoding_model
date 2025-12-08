@@ -7,4 +7,4 @@ This repository contains code for aligning brain activity with language models u
 - `/main_experiment/`: Contains implementation code for brain encoding experiments, including model training, evaluation, and feature extraction. Refer to the `README.md` inside of the `main_expeirment` for further detail.
 
 **Run Instrucitons**
-please run `main_experiemnt/scripts_clean.sh`
+please run `main_experiemnt/scripts/scripts_clean.sh`
