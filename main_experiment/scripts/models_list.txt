@@ -20,3 +20,6 @@ BabyLM-community/babylm-multimodal-baseline-flamingo-old, num_layer=12
 BabyLM-community/babylm-baseline-10m-gpt2, num_layer=12
 BabyLM-community/babylm-baseline-10m-gpt-bert-masked-focus, num_layer=12
 BabyLM-community/babylm-baseline-10m-gpt-bert-mixed, num_layer=12
+
+<added 251224>
+babylm/git-2024

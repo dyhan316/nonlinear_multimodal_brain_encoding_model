@@ -1,0 +1,9 @@
+model_id,display_name,track,challenge_year,BLiMP,BLiMP_Supplement,GLUE_or_SuperGLUE,MSGS_or_EWoK,Aggregate
+babylm/opt-125m-strict-2023,OPT 125M (100M),Strict (100M),2023,73.1,,70.19999999999999,13.3,60.3
+babylm/opt-125m-strict-small-2023,OPT 125M (10M),Strict-Small (10M),2023,59.699999999999996,,62.4,9.6,50.5
+babylm/t5-base-strict-2023,T5 Base 220M (100M),Strict (100M),2023,53.7,,72.1,6.9,49.8
+babylm/t5-base-strict-small-2023,T5 Base 220M (10M),Strict-Small (10M),2023,53.7,,58.3,-6.4,43.1
+babylm/babyllama-100m-2024,BabyLLaMA 58M (100M),Strict (100M),2024,73.1,60.6,69.0,52.1,63.7
+babylm-babyllama-10m-2024,BabyLLaMA 58M (10M),Strict-Small (10M),2024,69.8,59.5,63.3,50.7,60.8
+babylm/ltgbert-100m-2024,LTGBERT BASE (100M),Strict (100M),2024,69.2,66.5,68.4,51.9,64.0
+babylm/ltgbert-10m-2024,LTGBERT BASE (10M),Strict-Small (10M),2024,60.6,60.8,60.3,48.9,57.7

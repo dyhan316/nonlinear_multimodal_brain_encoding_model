@@ -263,6 +263,9 @@ def stim_initialize(stim_setting, setting, name):
         setting['S_MODEL'] = s_model
         setting['FEATURE_LAYER'] = feature_layer
         setting['HF_MODEL_NAME'] = hf_model_name
+        # T5 decoder features: use stim_setting like "babylm/t5-base-strict-2023_decoder_8"
+        # parse_general_settings will split to prefix="babylm/t5-base-strict-2023_decoder", layer=8
+        # hf_model_name becomes "babylm_t5-base-strict-2023_decoder" which matches the extraction folder
     elif stim_setting.startswith("EleutherAI") :
         s_model, feature_layer, hf_model_name = parse_general_settings(stim_setting)
         #assert s_model in LLM_MODEL_LIST

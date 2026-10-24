@@ -7,7 +7,7 @@ import joblib
 import numpy as np
 import torch
 # from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModelForMaskedLM
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM
 import ridge_utils
 from ridge_utils.util import make_delayed
 
@@ -43,6 +43,9 @@ print(config.STIM_FEATURE_EXTRACTED_DIR)
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_name", type = str, required = False, default = "huggyllama/llama-7b")
 parser.add_argument('--story_partition', type = int, required=True) # From 0 to 5! In units of 20! 
+parser.add_argument('--use_decoder', action='store_true', default=False,
+                    help="For encoder-decoder models (T5, BART): extract DECODER hidden states instead of encoder. "
+                         "Features are saved to a separate folder with '_decoder' suffix.")
 args = parser.parse_args()
 
 ####for figuring out the model tokenizer id relationship (for expanding to LLAMA)
@@ -99,7 +102,22 @@ tokenizer = AutoTokenizer.from_pretrained(model_name) # Same tokenizer for all s
 #    llama_version = 1
 #else : 
 #    raise NotImplementedError
-text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_robust(wordseqs, tokenizer, 256, 512)
+# --- Dynamic lookback window for short-context models (e.g., roberta max_pos=128) ---
+default_lookback1, default_lookback2 = 256, 512
+model_max_len = getattr(tokenizer, 'model_max_length', 999999)
+# Some tokenizers report absurdly large values (e.g., 1e30); treat those as unlimited
+if model_max_len > 100000:
+    model_max_len = 999999
+if model_max_len < default_lookback2:
+    # Scale lookback windows to fit within the model's max length (leave headroom for BOS/special tokens)
+    effective_max = max(model_max_len - 16, 32)  # leave 16 tokens headroom, minimum 32
+    default_lookback2 = effective_max
+    default_lookback1 = effective_max // 2
+    print(f"WARNING: model_max_length={model_max_len}, reducing lookback to ({default_lookback1}, {default_lookback2})")
+else:
+    print(f"model_max_length={model_max_len}, using default lookback ({default_lookback1}, {default_lookback2})")
+
+text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_robust(wordseqs, tokenizer, default_lookback1, default_lookback2)
 #text_dict, text_dict2, text_dict3 = generate_efficient_feat_dicts_llama(wordseqs, tokenizer, 256, 512)
 
 # --- START T5 FIX: SANITIZE DICTIONARIES ---
@@ -132,38 +150,32 @@ print("-----------------------------\n")
 # -----------------------------------
 
 if __name__ == "__main__":
-    #import pdb ; pdb.set_trace()
 
-    # Universal AutoModel testing (Works for GPT, Llama)
-
-    # model = AutoModelForMaskedLM.from_pretrained(model_name, 
-    #                                 device_map = 'cuda',
-    #                                 dtype = torch.float16,
-    #                                 trust_remote_code = True) 
-
-    # Universal AutoModel (Works for T5, BERT, GPT, Llama)
+    # Universal AutoModel (Works for T5, BERT, GPT, Llama, RoBERTa, etc.)
+    # NOTE: Some custom models (e.g., babylm/flamingo-2024) are NOT supported by AutoModel
+    # and require special handling. If you get "Unrecognized configuration class", the model
+    # needs its own loading logic added here.
+    warnings.warn("trust_remote_code is set to True. Make sure you trust the source of the model.")
     model = AutoModel.from_pretrained(model_name, 
                                 device_map = 'cuda',
                                 dtype = torch.float16,
                                 trust_remote_code = True)
-    warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
 
-    #! lucy added below. might be needed for processing models like BERT style, t5 .. Not working yet tho
-    # if "llama" in model_name.lower():
-    #     model = AutoModelForCausalLM.from_pretrained(model_name, device_map = 'auto', dtype = torch.float16, trust_remote_code = True) 
-    #     warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
-    # elif "bert" in model_name.lower():# or "roberta" in model_name.lower(): e.g."'babylm/ltgbert-100m-2024'"
-    #     model = AutoModelForMaskedLM.from_pretrained(model_name, dtype = torch.float16, trust_remote_code = True) 
-    #     if torch.cuda.is_available():
-    #         model = model.cuda()
-    #     else:
-    #         print("CUDA not available. Model is on CPU.")
-    #     warnings.warn("⚠️trust_remote_code is set to True. Make sure you trust the source of the model.")
-   
     model.eval()
-    # We will extract features from the 9th layer of the model
-    # LAYER_NUM = 9
-    num_layers = model.config.num_hidden_layers
+
+    # --- Determine number of layers ---
+    use_decoder = args.use_decoder
+    if use_decoder:
+        if not (hasattr(model, "encoder") and hasattr(model, "decoder")):
+            raise ValueError(f"--use_decoder was set but model '{model_name}' does not have encoder+decoder. "
+                             "This flag is only for T5/BART-style models.")
+        # T5 can have different num encoder vs decoder layers
+        num_layers = getattr(model.config, 'num_decoder_layers', model.config.num_hidden_layers)
+        print(f"DECODER MODE: extracting {num_layers} decoder hidden layers")
+    else:
+        num_layers = model.config.num_hidden_layers
+        print(f"ENCODER MODE: extracting {num_layers} hidden layers")
+
     text_dict3_list = [text_dict3.copy() for _ in range(num_layers)]
     start_time = time.time()
     for phrase in tqdm(text_dict2.keys(), desc="Extracting Features"):
@@ -171,24 +183,33 @@ if __name__ == "__main__":
             inputs = {}
             if len(text_dict[phrase]) == 0:
                 continue
-            inputs['input_ids'] = torch.tensor([text_dict[phrase]]).int().to(model.device) # Load token input ids for the corresponding phrase
+            inputs['input_ids'] = torch.tensor([text_dict[phrase]]).int().to(model.device)
             inputs['attention_mask'] = torch.ones(inputs['input_ids'].shape).to(model.device)
             with torch.no_grad():
-                #out = list(model(**inputs, output_hidden_states=True)[2]) #list of hidden states (layer by layer)
-                # outputs = model(**inputs, output_hidden_states=True)
-                
-                # --- START T5 FIX: USE ENCODER ONLY ---
-                if hasattr(model, "encoder") and hasattr(model, "decoder"):
-                    # For T5, BART, etc. -> Only run the encoder
-                    outputs = model.encoder(**inputs, output_hidden_states=True)
-                else:
-                    # For Llama, GPT, BERT -> Run normally
-                    outputs = model(**inputs, output_hidden_states=True)
-                # --- END T5 FIX ---
 
-                out = list(outputs.hidden_states)
+                if use_decoder and hasattr(model, "encoder") and hasattr(model, "decoder"):
+                    # --- T5 DECODER PATH ---
+                    # 1. Run encoder
+                    encoder_outputs = model.encoder(**inputs, output_hidden_states=False)
+                    # 2. Run decoder: use same input_ids as decoder_input_ids
+                    #    (this gives the decoder's representation of the input sequence)
+                    decoder_outputs = model.decoder(
+                        input_ids=inputs['input_ids'],
+                        encoder_hidden_states=encoder_outputs.last_hidden_state,
+                        output_hidden_states=True
+                    )
+                    out = list(decoder_outputs.hidden_states)
+                elif hasattr(model, "encoder") and hasattr(model, "decoder"):
+                    # T5/BART encoder-only path (existing behavior)
+                    outputs = model.encoder(**inputs, output_hidden_states=True)
+                    out = list(outputs.hidden_states)
+                else:
+                    # Llama, GPT, BERT, Flamingo(unwrapped), RoBERTa -> Run normally
+                    outputs = model(**inputs, output_hidden_states=True)
+                    out = list(outputs.hidden_states)
+
             for layer_num in range(num_layers):
-                out_layer = out[layer_num][0].cpu().detach().numpy() # Extract layer by layer! Should functionalize this and use for loop to get each layer!?
+                out_layer = out[layer_num][0].cpu().detach().numpy()
                 out_layer = np.array(out_layer)
                 this_key = tuple(inputs['input_ids'][0].cpu().detach().numpy())
                 acc_true = 0
@@ -202,14 +223,16 @@ if __name__ == "__main__":
     
     # Convert back from dictionary to matrix
     for layer_num in tqdm(range(num_layers)):
-        #feats, ds_feats = convert_to_feature_mats_llama(wordseqs, tokenizer, 256, 512, text_dict3_list[layer_num], llama_version = llama_version)
         feats, ds_feats = convert_to_feature_mats_robust(
             wordseqs,
             text_dict,
             text_dict3_list[layer_num]
         )
         
+        # Use _decoder suffix in folder name when extracting decoder features
         model_file_name = model_name.replace("/", "_")
+        if use_decoder:
+            model_file_name = model_file_name + "_decoder"
         os.makedirs(os.path.join(config.STIM_FEATURE_EXTRACTED_DIR, model_file_name), exist_ok = True)
         
         # Define the file paths and saving or updating!
@@ -219,7 +242,7 @@ if __name__ == "__main__":
         # Process feats
         if os.path.exists(feats_file_path):
             existing_feats = joblib.load(feats_file_path)
-            existing_feats.update(feats)  # Assuming feats is a dictionary
+            existing_feats.update(feats)
         else:
             existing_feats = feats
         joblib.dump(existing_feats, feats_file_path)
@@ -227,7 +250,7 @@ if __name__ == "__main__":
         # Process ds_feats
         if os.path.exists(ds_feats_file_path):
             existing_ds_feats = joblib.load(ds_feats_file_path)
-            existing_ds_feats.update(ds_feats)  # Assuming ds_feats is a dictionary
+            existing_ds_feats.update(ds_feats)
         else:
             existing_ds_feats = ds_feats
         joblib.dump(existing_ds_feats, ds_feats_file_path)
